@@ -1,38 +1,78 @@
 <template>
   <div class="regulation-list">
-    <h1>농업 규제 목록</h1>
-    <ul>
-      <li v-for="reg in regulations" :key="reg.id">
-        <router-link :to="{ name: 'RegulationDetail', params: { id: reg.id } }">
-          {{ reg.title }}
-        </router-link>
-      </li>
-    </ul>
+    <h2>규제 목록</h2>
+    <input v-model="search" placeholder="검색어 입력" @input="fetchRegulations" />
+    <table>
+      <thead>
+        <tr>
+          <th>제목</th>
+          <th>유형</th>
+          <th>지역</th>
+          <th>등록일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="reg in regulations" :key="reg.id">
+          <td>{{ reg.title }}</td>
+          <td>{{ reg.category }}</td>
+          <td>{{ reg.region }}</td>
+          <td>{{ formatDate(reg.created_at) }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-
-const regulations = ref([])
-
-onMounted(async () => {
-  // Mock API call – replace with real backend endpoint
-  const response = await fetch('https://api.example.com/regulations')
-  if (response.ok) {
-    regulations.value = await response.json()
-  } else {
-    // Fallback data
-    regulations.value = [
-      { id: 1, title: '농업법 개정안' },
-      { id: 2, title: '농산물 수출 규제' },
-    ]
-  }
-})
+<script>
+export default {
+  name: 'RegulationList',
+  data() {
+    return {
+      regulations: [],
+      search: '',
+    };
+  },
+  methods: {
+    async fetchRegulations() {
+      try {
+        const response = await this.$axios.get('/regulations', {
+          params: { q: this.search },
+        });
+        this.regulations = response.data;
+      } catch (err) {
+        console.error('Error fetching regulations:', err);
+      }
+    },
+    formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString();
+    },
+  },
+  mounted() {
+    this.fetchRegulations();
+  },
+};
 </script>
 
 <style scoped>
 .regulation-list {
-  padding: 1rem;
+  max-width: 800px;
+  margin: auto;
+}
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+th {
+  background-color: #f2f2f2;
 }
 </style>
