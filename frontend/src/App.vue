@@ -1,21 +1,23 @@
 <template>
-  <div id="app">
-    <h1>농업 규제 관리 시스템</h1>
-    <RegulationList />
-  </div>
+  <router-view />
 </template>
 
-<script>
+<script setup>
+import { createRouter, createWebHistory } from 'vue-router';
 import RegulationList from './components/RegulationList.vue';
-export default {
-  name: 'App',
-  components: { RegulationList },
-};
-</script>
+import RegulationDetail from './components/RegulationDetail.vue';
+import UserLogin from './components/UserLogin.vue';
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  margin: 20px;
-}
-</style>
+const routes = [
+  { path: '/', name: 'RegulationList', component: RegulationList },
+  { path: '/regulation/:id', name: 'RegulationDetail', component: RegulationDetail, props: true },
+  { path: '/login', name: 'Login', component: UserLogin },
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+export default router;
+</script>

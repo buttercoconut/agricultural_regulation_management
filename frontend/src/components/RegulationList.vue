@@ -1,78 +1,58 @@
 <template>
-  <div class="regulation-list">
-    <h2>규제 목록</h2>
-    <input v-model="search" placeholder="검색어 입력" @input="fetchRegulations" />
-    <table>
-      <thead>
-        <tr>
-          <th>제목</th>
-          <th>유형</th>
-          <th>지역</th>
-          <th>등록일</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="reg in regulations" :key="reg.id">
-          <td>{{ reg.title }}</td>
-          <td>{{ reg.category }}</td>
-          <td>{{ reg.region }}</td>
-          <td>{{ formatDate(reg.created_at) }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div>
+    <h2>Regulation List</h2>
+    <div>
+      <input v-model="search" placeholder="Search by title" @input="fetchRegulations(1)" />
+    </div>
+    <ul>
+      <li v-for="reg in regulations" :key="reg.id">
+        <router-link :to="{ name: 'RegulationDetail', params: { id: reg.id } }">
+          {{ reg.title }} ({{ reg.status }})
+        </router-link>
+      </li>
+    </ul>
+    <div>
+      <button @click="prevPage" :disabled="page <= 1">Prev</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="page >= totalPages">Next</button>
+    </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'RegulationList',
-  data() {
-    return {
-      regulations: [],
-      search: '',
-    };
-  },
-  methods: {
-    async fetchRegulations() {
-      try {
-        const response = await this.$axios.get('/regulations', {
-          params: { q: this.search },
-        });
-        this.regulations = response.data;
-      } catch (err) {
-        console.error('Error fetching regulations:', err);
-      }
-    },
-    formatDate(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString();
-    },
-  },
-  mounted() {
-    this.fetchRegulations();
-  },
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const regulations = ref([]);
+const page = ref(1);
+const pageSize = 10;
+const totalPages = ref(1);
+const search = ref('');
+
+const fetchRegulations = async (p = 1) => {
+  try {
+    const res = await axios.get('/api/regulations', {
+      params: { page: p, page_size: pageSize, search: search.value },
+    });
+    regulations.value = res.data.items;
+    totalPages.value = Math.ceil(res.data.total / pageSize);
+    page.value = p;
+  } catch (err) {
+    console.error(err);
+  }
 };
+
+const nextPage = () => {
+  if (page.value < totalPages.value) fetchRegulations(page.value + 1);
+};
+const prevPage = () => {
+  if (page.value > 1) fetchRegulations(page.value - 1);
+};
+
+onMounted(() => fetchRegulations());
 </script>
 
 <style scoped>
-.regulation-list {
-  max-width: 800px;
-  margin: auto;
-}
-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-th {
-  background-color: #f2f2f2;
-}
+ul { list-style: none; padding: 0; }
+li { margin: 5px 0; }
 </style>

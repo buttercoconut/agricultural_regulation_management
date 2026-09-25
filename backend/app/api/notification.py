@@ -1,3 +1,4 @@
-# Notification API placeholder
+# Placeholder for notification API
 from fastapi import APIRouter
-router = APIRouter(prefix="/notifications", tags=["notifications"])
+router = APIRouter()
+# Future implementation

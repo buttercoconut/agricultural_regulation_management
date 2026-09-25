@@ -1,35 +1,37 @@
 <template>
-  <div class="regulation-detail">
-    <h1>{{ regulation.title }}</h1>
-    <p>{{ regulation.content }}</p>
-    <router-link :to="{ name: 'Home' }">목록으로 돌아가기</router-link>
+  <div>
+    <h2>Regulation Detail</h2>
+    <div v-if="regulation">
+      <p><strong>ID:</strong> {{ regulation.id }}</p>
+      <p><strong>Title:</strong> {{ regulation.title }}</p>
+      <p><strong>Description:</strong> {{ regulation.description }}</p>
+      <p><strong>Status:</strong> {{ regulation.status }}</p>
+      <p><strong>Effective Date:</strong> {{ regulation.effective_date }}</p>
+      <p><strong>Regions:</strong> {{ regulation.region_ids.join(', ') }}</p>
+      <p><strong>Categories:</strong> {{ regulation.category_ids.join(', ') }}</p>
+    </div>
+    <div v-else>Loading...</div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
-const route = useRoute()
-const regulation = ref({ title: '', content: '' })
+const route = useRoute();
+const regulation = ref(null);
 
-onMounted(async () => {
-  const id = route.params.id
-  // Mock API call – replace with real backend endpoint
-  const response = await fetch(`https://api.example.com/regulations/${id}`)
-  if (response.ok) {
-    regulation.value = await response.json()
-  } else {
-    regulation.value = {
-      title: '예시 규제 제목',
-      content: '예시 규제 내용입니다. 실제 API에서 가져온 데이터를 표시합니다.',
-    }
+const fetchRegulation = async () => {
+  try {
+    const res = await axios.get(`/api/regulations/${route.params.id}`);
+    regulation.value = res.data;
+  } catch (err) {
+    console.error(err);
   }
-})
-</script>
+};
 
-<style scoped>
-.regulation-detail {
-  padding: 1rem;
-}
-</style>
+onMounted(() => {
+  fetchRegulation();
+});
+</script>

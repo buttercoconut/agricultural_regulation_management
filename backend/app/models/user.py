@@ -1,7 +1,10 @@
-# User model placeholder
-from pydantic import BaseModel
-class User(BaseModel):
-    id: int
-    name: str
-    email: str
-    role: str
+# Placeholder User model
+from sqlalchemy import Column, Integer, String
+from . import Base
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)

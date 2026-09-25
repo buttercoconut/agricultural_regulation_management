@@ -1,1 +1,1 @@
-# Application package initializer
+# app package initialization

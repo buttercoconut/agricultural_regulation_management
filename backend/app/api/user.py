@@ -1,3 +1,4 @@
-# User API placeholder
+# Placeholder for user API
 from fastapi import APIRouter
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter()
+# Future implementation
